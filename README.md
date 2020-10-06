@@ -1,15 +1,18 @@
-# PostgreSQLの練習
+# PostgreSQL の練習
+
 - 参照リファレンス: https://www.postgresql.jp/document/12/html/index.html
 
 # 環境構築
-- brewで入れる場合は素直に `brew install postgresql`
-- 今回はdockerイメージを利用した
-  - Dockerfileを作成
-  - docker-compose.ymlを作成
-  - 参考(docker環境構築)：https://crudzoo.com/blog/docker-postgres
+
+- brew で入れる場合は素直に `brew install postgresql`
+- 今回は docker イメージを利用した
+  - Dockerfile を作成
+  - docker-compose.yml を作成
+  - 参考(docker 環境構築)：https://crudzoo.com/blog/docker-postgres
   - 参考(docker-hub): https://hub.docker.com/_/postgres/
 
-# docker関連
+# docker 関連
+
 ```sh
 # コンテナ起動
 docker-compose up -d
@@ -34,6 +37,7 @@ docker-compose up -
 ```
 
 # 基本コマンド
+
 ```
 # db作成
 createdb <db名>
@@ -42,8 +46,10 @@ createdb <db名>
 dropdb <db名>
 ```
 
-# 基本的なSQL
+# 基本的な SQL: I. チュートリアル
+
 ## テーブル作成
+
 ```sql
 CREATE TABLE weather (
     city            varchar(80),
@@ -56,12 +62,13 @@ CREATE TABLE weather (
 ```
 
 ## テーブル削除
+
 ```sql
 DROP TABLE tablename;
 ```
 
-
 ## 行の挿入
+
 ```sql
 ## columnを指定しないパターン
 INSERT INTO weather VALUES ('San Francisco', 46, 50, 0.25, '1994-11-27');
@@ -71,15 +78,18 @@ INSERT INTO weather (date, city, temp_hi, temp_lo)
     VALUES ('1994-11-29', 'Hayward', 54, 37);
 ```
 
-## COPYコマンドによるデータのロード
+## COPY コマンドによるデータのロード
+
 大量データをテキストファイルからロードできる
+
 ```sql
 COPY weather FROM '/home/user/weather.txt';
 ```
 
 ## 問い合わせ
+
 ```sql
-## 
+##
 SELECT * FROM weather;
 
 ## 列指定
@@ -107,6 +117,7 @@ SELECT DISTINCT city
 ```
 
 ## テーブル間を結合して問い合わせを行う
+
 ```sql
 ## 問い合わせは全ての列名を修飾するのが良いと考えられている（列名が増えた場合に影響を受けなくて済むため）
 SELECT weather.city, weather.temp_lo, weather.temp_hi,
@@ -140,6 +151,7 @@ SELECT W1.city, W1.temp_lo AS low, W1.temp_hi AS high,
 ```
 
 ## 集約関数
+
 ```sql
 SELECT max(temp_lo) FROM weather;
 
@@ -169,8 +181,8 @@ SELECT city, max(temp_lo)
 # HAVINGは、グループと集約を演算した後に、グループ化された行を選択する
 ```
 
-
 ## 更新
+
 ```sql
 UPDATE weather
     SET temp_hi = temp_hi - 2,  temp_lo = temp_lo - 2
@@ -178,13 +190,17 @@ UPDATE weather
 ```
 
 ## 削除
+
 ```sql
 DELETE FROM weather WHERE city = 'Hayward';
 ```
 
 # 高度な諸機能
+
 ## View
-任意の問い合わせに対してビューを作り、通常のテーブルのように参照できる問い合わせに名前をつけることができる。他のビューに対するビューの作成もできる。Viewを自由に利用することはSQLデータベースの良い設計における重要な項目。
+
+任意の問い合わせに対してビューを作り、通常のテーブルのように参照できる問い合わせに名前をつけることができる。他のビューに対するビューの作成もできる。View を自由に利用することは SQL データベースの良い設計における重要な項目。
+
 ```sql
 CREATE VIEW myview AS
     SELECT city, temp_lo, temp_hi, prcp, date, location
@@ -195,6 +211,7 @@ SELECT * FROM myview;
 ```
 
 ## 外部キー
+
 ```sql
 CREATE TABLE cities (
         city     varchar(80) primary key,
@@ -217,7 +234,8 @@ DETAIL:  Key (city)=(Berkeley) is not present in table "cities".
 ```
 
 ## トランザクション
-PostgreSQLは全てのSQL文をトランザクション内で実行する。
+
+PostgreSQL は全ての SQL 文をトランザクション内で実行する。
 トランザクションは、`BEGIN` と `COMMIT` で囲んで設定する。
 
 ```SQL
@@ -230,9 +248,11 @@ COMMIT;
 ```
 
 ## ウインドウ関数
-ここがわかりやすかった [window関数を使いこなす 〜分析のためのSQL〜](https://qiita.com/HiromuMasuda0228/items/0b20d461f1a80bd30cfc)
+
+ここがわかりやすかった [window 関数を使いこなす 〜分析のための SQL〜](https://qiita.com/HiromuMasuda0228/items/0b20d461f1a80bd30cfc)
+
 - 現在の行に関するテーブル全体を舐める計算をする
-- 集約関数と考え方は似ている。集約関数は1行に集約するが、window関数では対象行はそのまま残る
+- 集約関数と考え方は似ている。集約関数は 1 行に集約するが、window 関数では対象行はそのまま残る
 - 対象の行全てに対して処理が行われる
 
 ```sql
@@ -255,16 +275,16 @@ FROM emp_info;
  sales     |     3 |   4800 |        4866
  sales     |     1 |   5000 |        4866
  sales     |     4 |   4800 |        4866
- ```
+```
 
->OVERとPARTITION BYという2つの関数が出てきました。続いてこれらを解説します。
->OVERはwindow関数を使いますよーというサインです。OVERの後に、どのようにwindowを作るのかということを定義します。
->PARTITIONでwindow、つまりどの範囲でグループを作るか指定します。
+> OVER と PARTITION BY という 2 つの関数が出てきました。続いてこれらを解説します。
+> OVER は window 関数を使いますよーというサインです。OVER の後に、どのように window を作るのかということを定義します。
+> PARTITION で window、つまりどの範囲でグループを作るか指定します。
 
->AVG(salary) OVER (PARTITION BY depname)は、depnameでグループを作った上で、自分が属するdepnameのsalaryのAVGをちょうだいと言っています。
-
+> AVG(salary) OVER (PARTITION BY depname)は、depname でグループを作った上で、自分が属する depname の salary の AVG をちょうだいと言っています。
 
 ## 継承
+
 テーブルを継承してデータを扱うことができる便利な機能。
 ただし、一意制約や外部キーと統合されてないので万能ではない。
 
@@ -294,4 +314,48 @@ SELECT name, elevation
     FROM ONLY cities
     WHERE elevation > 500;
 
+```
+
+# Ⅱ. SQL 言語
+
+## SQL の構文
+
+- 読み飛ばした
+
+## データ定義
+
+### テーブルの基本
+
+- 列数の上限は型に応じて 250〜1600
+  - これほど多くの列を使うのは稀で設計に問題がある可能性が高い
+- PostgreSQL では組み込みデータ型・ユーザ独自が定義するデータ型が使える
+- よく使われるのは、整数を表す integer、少数も表せる numeric、文字列を表せる text、日付 date、時刻 time、日付と時刻両方の timestamp
+  - 金額を扱うのは numeric が一般的
+
+### デフォルト値
+
+- 列にはデフォルト値を与えることができる
+- 明示的に宣言されたデフォルト値がなければデフォルト値は null になる
+- 以下はデフォルト値としてのよくある例（通番を割り振る）
+
+```sql
+CREATE TABLE products (
+    product_no integer DEFAULT nextval('products_poroduct_no_seq')
+    ...
+);
+```
+
+### 生成列
+
+- 他の列から計算される特別な列
+- 格納生成列：挿入・更新時に計算され、ストレージが割り当てられる
+- 仮装生成列：列が読み出された時に計算され、ストレージは割り当てられない
+- PostgreSQL は格納生成列のみ実装している（ver.12.3)
+
+```sql
+CREATE TABLE people(
+    ...,
+    height_cm numeric,
+    height_in numeric GENERATED ALWAYS AS (height_cm / 2.54) STORED
+)
 ```
